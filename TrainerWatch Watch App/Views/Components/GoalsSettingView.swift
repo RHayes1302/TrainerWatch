@@ -10,30 +10,30 @@ import SwiftUI
 /// View for setting daily goals
 /// Design Principle: Simple configuration with sensible defaults
 struct GoalsSettingsView: View {
-    
+
     // MARK: - Properties
     @ObservedObject var viewModel: HealthViewModel
     @Environment(\.dismiss) private var dismiss
-    
+
     @State private var caloriesGoal: Double
     @State private var waterGoal: Double
-    
+
     // MARK: - Preset Options
-    /// Design Principle: Quick selection reduces effort
     private let caloriesPresets: [Double] = [1500, 2000, 2500, 3000]
     private let waterPresets: [Double] = [1500, 2000, 2500, 3000]
-    
+
     // MARK: - Initialization
     init(viewModel: HealthViewModel) {
         self.viewModel = viewModel
         _caloriesGoal = State(initialValue: viewModel.goals.dailyCaloriesGoal)
         _waterGoal = State(initialValue: viewModel.goals.dailyWaterGoal)
     }
-    
+
     // MARK: - Body
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
+
                 // Calories Goal Section
                 VStack(spacing: 10) {
                     HStack {
@@ -43,20 +43,19 @@ struct GoalsSettingsView: View {
                             .font(.system(size: 13, weight: .medium))
                         Spacer()
                     }
-                    
+
                     Text("\(Int(caloriesGoal)) kcal")
                         .font(.system(size: 20, weight: .bold, design: .rounded))
                         .foregroundColor(.orange)
-                    
-                    // Preset buttons
-                    // Design Principle: One-tap selections
+
                     HStack(spacing: 6) {
                         ForEach(caloriesPresets, id: \.self) { preset in
                             Button {
                                 viewModel.playClickHaptic()
                                 caloriesGoal = preset
                             } label: {
-                                Text("\(Int(preset/1000))k")
+                               
+                                Text(caloriesLabel(for: preset))
                                     .font(.system(size: 11, weight: .medium))
                                     .padding(.horizontal, 8)
                                     .padding(.vertical, 6)
@@ -72,10 +71,10 @@ struct GoalsSettingsView: View {
                         }
                     }
                 }
-                
+
                 Divider()
                     .background(Color.gray.opacity(0.3))
-                
+
                 // Water Goal Section
                 VStack(spacing: 10) {
                     HStack {
@@ -85,19 +84,19 @@ struct GoalsSettingsView: View {
                             .font(.system(size: 13, weight: .medium))
                         Spacer()
                     }
-                    
+
                     Text("\(Int(waterGoal)) ml")
                         .font(.system(size: 20, weight: .bold, design: .rounded))
                         .foregroundColor(.cyan)
-                    
-                    // Preset buttons
+
                     HStack(spacing: 6) {
                         ForEach(waterPresets, id: \.self) { preset in
                             Button {
                                 viewModel.playClickHaptic()
                                 waterGoal = preset
                             } label: {
-                                Text("\(Int(preset/1000))L")
+                             
+                                Text(waterLabel(for: preset))
                                     .font(.system(size: 11, weight: .medium))
                                     .padding(.horizontal, 8)
                                     .padding(.vertical, 6)
@@ -113,7 +112,7 @@ struct GoalsSettingsView: View {
                         }
                     }
                 }
-                
+
                 // Save Button
                 Button {
                     viewModel.updateGoals(calories: caloriesGoal, water: waterGoal)
@@ -136,6 +135,24 @@ struct GoalsSettingsView: View {
         .navigationTitle("Goals")
         .navigationBarTitleDisplayMode(.inline)
     }
+
+    // MARK: - Label Helpers
+
+    /// Formats calorie preset as "1.5k", "2k", etc.
+    private func caloriesLabel(for value: Double) -> String {
+        let k = value / 1000
+        return k.truncatingRemainder(dividingBy: 1) == 0
+            ? "\(Int(k))k"
+            : "\(k)k"
+    }
+
+    /// Formats water preset as "1.5L", "2L", etc.
+    private func waterLabel(for value: Double) -> String {
+        let l = value / 1000
+        return l.truncatingRemainder(dividingBy: 1) == 0
+            ? "\(Int(l))L"
+            : "\(l)L"
+    }
 }
 
 // MARK: - Preview
@@ -144,4 +161,3 @@ struct GoalsSettingsView: View {
         GoalsSettingsView(viewModel: HealthViewModel())
     }
 }
-
